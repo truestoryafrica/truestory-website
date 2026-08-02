@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="490" height="112" viewBox="0 0 490 112">
+  <defs>
+    
+  </defs>
+
+  
+  <rect width="490" height="112" fill="#111111" rx="3"></rect>
+
+  
+  
+  <polyline points="19,35 19,15 40,15" stroke="#FFFFFF" stroke-width="3.8" fill="none" stroke-linecap="square" stroke-linejoin="miter"></polyline>
+  
+  <polyline points="78,15 99,15 99,35" stroke="#FFFFFF" stroke-width="3.8" fill="none" stroke-linecap="square" stroke-linejoin="miter"></polyline>
+  
+  <polyline points="19,77 19,97 40,97" stroke="#FFFFFF" stroke-width="3.8" fill="none" stroke-linecap="square" stroke-linejoin="miter"></polyline>
+  
+  <polyline points="78,97 99,97 99,77" stroke="#FFFFFF" stroke-width="3.8" fill="none" stroke-linecap="square" stroke-linejoin="miter"></polyline>
+  
+  <circle cx="59" cy="56" r="11" fill="#CC1520"></circle>
+
+  
+  <text x="119" y="72" class="ts">
+    <tspan fill="#FFFFFF">TRUESTORY</tspan><tspan fill="#CC1520">.</tspan>
+  </text>
+
+  
+  <text x="119" y="94" class="af" fill="#C8953A">AFRICA</text>
+</svg>

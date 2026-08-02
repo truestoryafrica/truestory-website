@@ -1,0 +1,23 @@
+{
+  "name": "truestory-africa-cms-site",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "next": "^15.4.0",
+    "postgres": "^3.4.9",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "sanitize-html": "^2.17.6"
+  },
+  "devDependencies": {
+    "eslint": "^9.31.0",
+    "eslint-config-next": "^15.4.0"
+  }
+}
