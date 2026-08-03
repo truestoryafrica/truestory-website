@@ -12,9 +12,9 @@ import { organizationJsonLd, pageMetadata } from "@/lib/seo";
 export const dynamic = "force-dynamic";
 
 export const metadata = pageMetadata({
-  title: "Documentary, Photography & Communication Services in Rwanda",
+  title: "Documentary, Photography & Communication",
   description:
-    "TrueStory Africa provides documentary video production, photography, event coverage, content writing and communication services for impact-driven organizations in Rwanda and across Africa.",
+    "Documentary video, photography, event coverage and communication services for impact-driven organizations in Rwanda and across Africa.",
   path: "/"
 });
 

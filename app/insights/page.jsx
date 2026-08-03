@@ -8,7 +8,7 @@ import Footer from "@/components/Footer";
 export const dynamic = "force-dynamic";
 
 export const metadata = pageMetadata({
-  title: "Insights on Documentary Storytelling in Africa",
+  title: "Insights on Documentary Storytelling",
   description:
     "Field notes, behind-the-scenes thinking and practical insights on documentary, photography and communication work in Rwanda and Africa.",
   path: "/insights",
