@@ -72,7 +72,7 @@ export const services = [
     slug: "event-coverage-rwanda",
     number: "02",
     image: "/assets/images/service-event-coverage.webp",
-    alt: "A conference audience watching a keynote speaker on stage",
+    alt: "Conference attendees seated at round tables during a panel workshop",
     summary: "Every keynote and ribbon-cutting, captured with intent.",
     seoTitle: "Event Coverage in Rwanda | TrueStory Africa",
     seoDescription:
@@ -121,6 +121,60 @@ export const services = [
     seoTitle: "Social Media Management in Rwanda | TrueStory Africa",
     seoDescription:
       "Social media content planning and management for impact-driven organizations in Rwanda."
+  }
+];
+
+// Real photo sets from past event-coverage assignments, shown on the Event
+// Coverage service page. Each event gets its own small gallery rather than
+// one generic photo, so the range of work (workshops, galas, broadcast
+// events) is obvious at a glance.
+export const eventGalleries = [
+  {
+    name: "AU-WYDE Regional Workshop",
+    slug: "unwomen-au-wyde",
+    category: "Event Coverage",
+    videoUrl: "",
+    client: "UN Women / UNICEF Rwanda",
+    description: "Panel sessions and working groups from a regional workshop on women and youth in the digital economy.",
+    images: [
+      { src: "/assets/images/events/unwomen-au-wyde/1.webp", alt: "Attendees at the AU-WYDE regional workshop" },
+      { src: "/assets/images/events/unwomen-au-wyde/2.webp", alt: "Panelist speaking at the AU-WYDE regional workshop" },
+      { src: "/assets/images/events/unwomen-au-wyde/3.webp", alt: "Working group session at the AU-WYDE regional workshop" },
+      { src: "/assets/images/events/unwomen-au-wyde/4.webp", alt: "Panel discussion at the AU-WYDE regional workshop" },
+      { src: "/assets/images/events/unwomen-au-wyde/5.webp", alt: "Speaker addressing the AU-WYDE regional workshop" },
+      { src: "/assets/images/events/unwomen-au-wyde/6.webp", alt: "Wide view of the AU-WYDE regional workshop conference room" }
+    ]
+  },
+  {
+    name: "Equity Group Gala Dinner",
+    slug: "equity-group-gala-dinner",
+    category: "Event Coverage",
+    videoUrl: "",
+    client: "Equity Group — Powering Africa's Opportunities",
+    description: "An evening gala bringing together business leaders and partners across the region.",
+    images: [
+      { src: "/assets/images/events/equity-group-gala-dinner/1.webp", alt: "Gala dinner venue setup with stage backdrop" },
+      { src: "/assets/images/events/equity-group-gala-dinner/2.webp", alt: "Guests networking at the Equity Group gala dinner" },
+      { src: "/assets/images/events/equity-group-gala-dinner/3.webp", alt: "Guest at the Equity Group gala dinner" },
+      { src: "/assets/images/events/equity-group-gala-dinner/4.webp", alt: "Guests arriving at the Equity Group gala dinner" },
+      { src: "/assets/images/events/equity-group-gala-dinner/5.webp", alt: "Guests toasting at the Equity Group gala dinner" }
+    ]
+  },
+  {
+    name: "Ukwezi Kw'Abana Broadcast Event",
+    slug: "ukwezi-child-protection",
+    category: "Event Coverage",
+    videoUrl: "",
+    client: "NCDA / Rwanda Broadcasting Agency",
+    description: "Live broadcast coverage of a public child-protection awareness campaign event.",
+    images: [
+      { src: "/assets/images/events/ukwezi-child-protection/1.webp", alt: "Speaker on stage at the Ukwezi Kw'Abana broadcast event" },
+      { src: "/assets/images/events/ukwezi-child-protection/2.webp", alt: "Panelist speaking at the Ukwezi Kw'Abana broadcast event" },
+      { src: "/assets/images/events/ukwezi-child-protection/3.webp", alt: "Panelist at the Ukwezi Kw'Abana broadcast event" },
+      { src: "/assets/images/events/ukwezi-child-protection/4.webp", alt: "Panelists seated on stage at the Ukwezi Kw'Abana broadcast event" },
+      { src: "/assets/images/events/ukwezi-child-protection/5.webp", alt: "Full panel on stage at the Ukwezi Kw'Abana broadcast event" },
+      { src: "/assets/images/events/ukwezi-child-protection/6.webp", alt: "Panelist speaking at the Ukwezi Kw'Abana broadcast event" }
+    ]
   }
 ];
 

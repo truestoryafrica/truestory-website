@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Brand from "@/components/Brand";
+import { insightCategories } from "@/lib/insightCategories";
 
 const contentTypes = ["Article"];
-const insightCategories = ["Field Notes", "Behind the Scenes", "Culture", "Company News", "Impact"];
 
 const emptyDraft = {
   slug: "",
@@ -18,10 +18,37 @@ const emptyDraft = {
   category: "Documentary",
   location: "Rwanda",
   image: "",
-  alt: ""
+  alt: "",
+  publishAt: "",
+  featured: false
 };
 
-export default function AdminDashboardClient({ stories, insights, site, notices }) {
+const emptyEventDraft = {
+  slug: "",
+  name: "",
+  client: "",
+  description: "",
+  category: "Event Coverage",
+  videoUrl: "",
+  status: "published",
+  publishAt: ""
+};
+
+// datetime-local inputs need "YYYY-MM-DDTHH:mm" in the visitor's local time,
+// not the ISO string (with seconds + "Z") the database stores.
+function isScheduled(item) {
+  return item.status !== "draft" && Boolean(item.publishAt) && new Date(item.publishAt).getTime() > Date.now();
+}
+
+function toDatetimeLocalValue(isoString) {
+  if (!isoString) return "";
+  const date = new Date(isoString);
+  if (Number.isNaN(date.getTime())) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+export default function AdminDashboardClient({ stories, insights, events, site, notices }) {
   const [view, setView] = useState(notices.settingsSaved ? "settings" : "dashboard");
   const [draft, setDraft] = useState(emptyDraft);
   const [contentKind, setContentKind] = useState("story");
@@ -31,6 +58,12 @@ export default function AdminDashboardClient({ stories, insights, site, notices 
   const [editorOpen, setEditorOpen] = useState(false);
   const editorRef = useRef(null);
   const closeButtonRef = useRef(null);
+
+  const [eventDraft, setEventDraft] = useState(emptyEventDraft);
+  const [eventImages, setEventImages] = useState([]);
+  const [eventUploading, setEventUploading] = useState(false);
+  const [eventEditorOpen, setEventEditorOpen] = useState(false);
+  const eventCloseButtonRef = useRef(null);
 
   const localCount = stories.filter((story) => story.isLocal).length;
 
@@ -65,6 +98,24 @@ export default function AdminDashboardClient({ stories, insights, site, notices 
     };
   }, [editorOpen]);
 
+  useEffect(() => {
+    if (!eventEditorOpen) return undefined;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    eventCloseButtonRef.current?.focus();
+
+    function handleKeyDown(event) {
+      if (event.key === "Escape") closeEventEditor();
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [eventEditorOpen]);
+
   function updateDraft(field, value) {
     setDraft((current) => ({ ...current, [field]: value }));
   }
@@ -79,7 +130,7 @@ export default function AdminDashboardClient({ stories, insights, site, notices 
 
   function startNewInsight() {
     setContentKind("insight");
-    setDraft({ ...emptyDraft, type: "Insight", category: "Field Notes", location: "" });
+    setDraft({ ...emptyDraft, type: "Insight", category: insightCategories[0], location: "" });
     setBodyHtml("");
     setPreview(false);
     setEditorOpen(true);
@@ -98,7 +149,8 @@ export default function AdminDashboardClient({ stories, insights, site, notices 
       category: story.category || "Documentary",
       location: story.location || "Rwanda",
       image: story.image || "",
-      alt: story.alt || ""
+      alt: story.alt || "",
+      publishAt: toDatetimeLocalValue(story.publishAt)
     });
     setBodyHtml(story.bodyHtml || "");
     setPreview(false);
@@ -118,7 +170,9 @@ export default function AdminDashboardClient({ stories, insights, site, notices 
       category: insight.category || "Field Notes",
       location: "",
       image: insight.image || "",
-      alt: insight.alt || ""
+      alt: insight.alt || "",
+      publishAt: toDatetimeLocalValue(insight.publishAt),
+      featured: Boolean(insight.featured)
     });
     setBodyHtml(insight.bodyHtml || "");
     setPreview(false);
@@ -158,6 +212,59 @@ export default function AdminDashboardClient({ stories, insights, site, notices 
     }
   }
 
+  function updateEventDraft(field, value) {
+    setEventDraft((current) => ({ ...current, [field]: value }));
+  }
+
+  function startNewEvent() {
+    setEventDraft(emptyEventDraft);
+    setEventImages([]);
+    setEventEditorOpen(true);
+  }
+
+  function editEvent(event) {
+    setEventDraft({
+      slug: event.slug || "",
+      name: event.name || "",
+      client: event.client || "",
+      description: event.description || "",
+      category: event.category || "Event Coverage",
+      videoUrl: event.videoUrl || "",
+      status: event.status || "published",
+      publishAt: toDatetimeLocalValue(event.publishAt)
+    });
+    setEventImages((event.images || []).map((image) => image.src));
+    setEventEditorOpen(true);
+  }
+
+  function closeEventEditor() {
+    setEventEditorOpen(false);
+  }
+
+  async function uploadEventImages(fileEvent) {
+    const files = Array.from(fileEvent.target.files || []);
+    if (!files.length) return;
+    setEventUploading(true);
+    const uploaded = [];
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append("file", file);
+      // eslint-disable-next-line no-await-in-loop
+      const response = await fetch("/api/admin/upload", { method: "POST", body: formData });
+      // eslint-disable-next-line no-await-in-loop
+      const result = await response.json();
+      if (result.url) uploaded.push(result.url);
+      else window.alert(result.error || `Upload failed for ${file.name}.`);
+    }
+    setEventUploading(false);
+    setEventImages((current) => [...current, ...uploaded]);
+    fileEvent.target.value = "";
+  }
+
+  function removeEventImage(url) {
+    setEventImages((current) => current.filter((image) => image !== url));
+  }
+
   return (
     <main className="admin-dashboard-page admin-command-center" data-theme="dark">
       <aside className="admin-dashboard-sidebar">
@@ -185,6 +292,7 @@ export default function AdminDashboardClient({ stories, insights, site, notices 
                 <button type="button" key={type} onClick={() => startNew(type)}>{type}</button>
               ))}
               <button type="button" onClick={startNewInsight}>Insight</button>
+              <button type="button" onClick={startNewEvent}>Event</button>
             </div>
           </details>
           <button
@@ -233,9 +341,12 @@ export default function AdminDashboardClient({ stories, insights, site, notices 
         {notices.deleted && <Notice type="success" title="Deleted" text="The local story was removed from the website." />}
         {notices.createdInsight && <Notice type="success" title="Insight saved" text="The insight is now visible on the website." />}
         {notices.deletedInsight && <Notice type="success" title="Deleted" text="The local insight was removed from the website." />}
+        {notices.createdEvent && <Notice type="success" title="Event saved" text="The event gallery is now visible on the Event Coverage page." />}
+        {notices.deletedEvent && <Notice type="success" title="Deleted" text="The local event was removed from the website." />}
         {notices.settingsSaved && <Notice type="success" title="Settings saved" text="Website contact and social details were updated." />}
         {notices.storyError && <Notice type="error" title="Missing content" text="Add at least a headline and excerpt before saving." />}
         {notices.insightError && <Notice type="error" title="Missing content" text="Add at least a headline and excerpt before saving." />}
+        {notices.eventError && <Notice type="error" title="Missing content" text="Add at least an event name before saving." />}
         {notices.dbError && <Notice type="error" title="Save failed" text="Could not reach the database. Check your connection and try again." />}
 
         {view === "dashboard" && (
@@ -276,6 +387,10 @@ export default function AdminDashboardClient({ stories, insights, site, notices 
             <button type="button" onClick={startNewInsight}>
               <strong>Insight</strong>
               <span>Field notes & commentary</span>
+            </button>
+            <button type="button" onClick={startNewEvent}>
+              <strong>Event</strong>
+              <span>Photo gallery & video for an event</span>
             </button>
           </div>
         </section>
@@ -462,7 +577,14 @@ export default function AdminDashboardClient({ stories, insights, site, notices 
                         <span>Category</span>
                         <select name="category" value={draft.category} onChange={(event) => updateDraft("category", event.target.value)}>
                           {contentKind === "insight"
-                            ? insightCategories.map((category) => <option key={category}>{category}</option>)
+                            ? (
+                              <>
+                                {draft.category && !insightCategories.includes(draft.category) && (
+                                  <option value={draft.category}>{draft.category} (previous category)</option>
+                                )}
+                                {insightCategories.map((category) => <option key={category}>{category}</option>)}
+                              </>
+                            )
                             : (
                               <>
                                 <option>Documentary</option>
@@ -476,6 +598,27 @@ export default function AdminDashboardClient({ stories, insights, site, notices 
                             )}
                         </select>
                       </label>
+                      <label>
+                        <span>Publish Date</span>
+                        <input
+                          type="datetime-local"
+                          name="publishAt"
+                          value={draft.publishAt}
+                          onChange={(event) => updateDraft("publishAt", event.target.value)}
+                        />
+                        <small>Leave blank to publish immediately once you hit Publish.</small>
+                      </label>
+                      {contentKind === "insight" && (
+                        <label className="admin-checkbox-field">
+                          <input
+                            type="checkbox"
+                            name="featured"
+                            checked={draft.featured}
+                            onChange={(event) => updateDraft("featured", event.target.checked)}
+                          />
+                          <span>Feature this insight above the others</span>
+                        </label>
+                      )}
                     </section>
 
                     <section>
@@ -502,6 +645,135 @@ export default function AdminDashboardClient({ stories, insights, site, notices 
           </div>
         )}
 
+        {eventEditorOpen && (
+          <div className="admin-editor-modal" role="dialog" aria-modal="true" aria-label={`${eventDraft.slug ? "Edit" : "Create New"} Event`}>
+            <div className="admin-editor-modal-card">
+              <header className="admin-editor-modal-header">
+                <h2>{eventDraft.slug ? "Edit Event" : "Create New Event"}</h2>
+                <button
+                  type="button"
+                  className="admin-editor-close"
+                  onClick={closeEventEditor}
+                  aria-label="Close editor"
+                  ref={eventCloseButtonRef}
+                >
+                  ×
+                </button>
+              </header>
+
+              <form action="/api/admin/events" method="post" className="admin-modal-form">
+                <input type="hidden" name="slug" value={eventDraft.slug} />
+                <input type="hidden" name="images" value={eventImages.join(",")} />
+
+                <div className="admin-modal-editor-grid">
+                  <section className="admin-modal-main-editor">
+                    <p className="admin-panel-kicker">Events / {eventDraft.slug ? "Editing" : "New Draft"}</p>
+                    <div className="admin-modal-actions">
+                      <button type="submit" name="status" value="draft" className="secondary">Save Draft</button>
+                      <button type="submit" name="status" value="published">
+                        {eventDraft.slug ? "Update Event" : "Publish Event"}
+                      </button>
+                    </div>
+
+                    <label className="admin-modal-title-field">
+                      <span>Event Name</span>
+                      <input
+                        name="name"
+                        value={eventDraft.name}
+                        onChange={(event) => updateEventDraft("name", event.target.value)}
+                        placeholder="e.g. Annual Partners Summit"
+                        required
+                      />
+                    </label>
+
+                    <label className="admin-modal-excerpt-field">
+                      <span>Description</span>
+                      <textarea
+                        rows="3"
+                        value={eventDraft.description}
+                        onChange={(event) => updateEventDraft("description", event.target.value)}
+                        placeholder="One or two lines about the event..."
+                      />
+                    </label>
+                    <input type="hidden" name="description" value={eventDraft.description} />
+
+                    <div className="admin-form-row">
+                      <label>
+                        <span>Client / Organization</span>
+                        <input
+                          name="client"
+                          value={eventDraft.client}
+                          onChange={(event) => updateEventDraft("client", event.target.value)}
+                          placeholder="e.g. UN Women Rwanda"
+                        />
+                      </label>
+                      <label>
+                        <span>Category</span>
+                        <input
+                          name="category"
+                          value={eventDraft.category}
+                          onChange={(event) => updateEventDraft("category", event.target.value)}
+                          placeholder="Event Coverage"
+                        />
+                      </label>
+                    </div>
+
+                    <label>
+                      <span>Video Link (optional)</span>
+                      <input
+                        name="videoUrl"
+                        value={eventDraft.videoUrl}
+                        onChange={(event) => updateEventDraft("videoUrl", event.target.value)}
+                        placeholder="https://youtube.com/watch?v=..."
+                      />
+                    </label>
+
+                    <label>
+                      <span>Publish Date</span>
+                      <input
+                        type="datetime-local"
+                        name="publishAt"
+                        value={eventDraft.publishAt}
+                        onChange={(event) => updateEventDraft("publishAt", event.target.value)}
+                      />
+                      <small>Leave blank to publish immediately once you hit Publish.</small>
+                    </label>
+                  </section>
+
+                  <aside className="admin-modal-side">
+                    <section>
+                      <h3>Event Photos</h3>
+                      <p>Upload every photo you want shown for this event — the first four appear in the gallery grid, the rest open in "view more".</p>
+                      <label className="admin-upload-box">
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp,image/gif"
+                          multiple
+                          onChange={uploadEventImages}
+                        />
+                        <span>{eventUploading ? "Uploading..." : "Add Photos"}</span>
+                      </label>
+                      {eventImages.length > 0 && (
+                        <div className="admin-event-photo-grid">
+                          {eventImages.map((url) => (
+                            <div className="admin-event-photo-thumb" key={url}>
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={url} alt="" />
+                              <button type="button" onClick={() => removeEventImage(url)} aria-label="Remove photo">
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </section>
+                  </aside>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
         {view === "dashboard" && (
         <section className="admin-panel admin-library-panel" id="stories-list">
           <div className="admin-panel-heading">
@@ -520,6 +792,7 @@ export default function AdminDashboardClient({ stories, insights, site, notices 
                 </div>
                 <span>{story.type || "Story"}</span>
                 {story.status === "draft" && <span className="admin-draft-badge">Draft</span>}
+                {isScheduled(story) && <span className="admin-draft-badge">Scheduled</span>}
                 <button type="button" onClick={() => editStory(story)}>Edit</button>
                 <Link href={`/stories/${story.slug}`}>Preview</Link>
                 {story.isLocal && (
@@ -553,7 +826,9 @@ export default function AdminDashboardClient({ stories, insights, site, notices 
                   <p>{insight.category} {insight.isLocal ? "/ Managed here" : "/ Default content"}</p>
                 </div>
                 <span>Insight</span>
+                {insight.featured && <span className="admin-featured-badge">Featured</span>}
                 {insight.status === "draft" && <span className="admin-draft-badge">Draft</span>}
+                {isScheduled(insight) && <span className="admin-draft-badge">Scheduled</span>}
                 <button type="button" onClick={() => editInsight(insight)}>Edit</button>
                 <Link href={`/insights/${insight.slug}`}>Preview</Link>
                 {insight.isLocal && (
@@ -567,6 +842,43 @@ export default function AdminDashboardClient({ stories, insights, site, notices 
               </article>
             )) : (
               <div className="admin-empty-state">No insights yet. Use "New Insight" above to publish the first one.</div>
+            )}
+          </div>
+        </section>
+        )}
+
+        {view === "dashboard" && (
+        <section className="admin-panel admin-library-panel" id="events-list">
+          <div className="admin-panel-heading">
+            <div>
+              <p className="admin-panel-kicker">Library</p>
+              <h2>Website Events</h2>
+            </div>
+            <button type="button" className="admin-small-action" onClick={startNewEvent}>New Event</button>
+          </div>
+          <div className="admin-story-table">
+            {events.length ? events.map((event) => (
+              <article key={event.slug}>
+                <div>
+                  <strong>{event.name}</strong>
+                  <p>{event.client || event.category} {event.isLocal ? "/ Managed here" : "/ Default content"}</p>
+                </div>
+                <span>{(event.images || []).length} photos</span>
+                {event.status === "draft" && <span className="admin-draft-badge">Draft</span>}
+                {isScheduled(event) && <span className="admin-draft-badge">Scheduled</span>}
+                <button type="button" onClick={() => editEvent(event)}>Edit</button>
+                <Link href="/services/event-coverage-rwanda">Preview</Link>
+                {event.isLocal && (
+                  <form action="/api/admin/events/delete" method="post" onSubmit={(submitEvent) => {
+                    if (!window.confirm("Delete this event from the website?")) submitEvent.preventDefault();
+                  }}>
+                    <input type="hidden" name="slug" value={event.slug} />
+                    <button type="submit" className="danger">Delete</button>
+                  </form>
+                )}
+              </article>
+            )) : (
+              <div className="admin-empty-state">No events yet. Use "New Event" above to publish the first one.</div>
             )}
           </div>
         </section>
@@ -623,6 +935,15 @@ export default function AdminDashboardClient({ stories, insights, site, notices 
             <label>
               <span>YouTube</span>
               <input name="youtube" defaultValue={site.social?.youtube} />
+            </label>
+            <label>
+              <span>Documentary Showreel Video</span>
+              <input
+                name="documentaryVideoUrl"
+                defaultValue={site.documentaryVideoUrl}
+                placeholder="https://youtube.com/watch?v=..."
+              />
+              <small>Shown on the Documentary Video Production service page. Leave blank to show the "coming soon" placeholder instead.</small>
             </label>
             <button type="submit">Save Settings</button>
           </form>

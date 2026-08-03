@@ -22,8 +22,11 @@ create table if not exists stories (
   date timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   seo_title text,
-  seo_description text
+  seo_description text,
+  publish_at timestamptz
 );
+
+alter table stories add column if not exists publish_at timestamptz;
 
 create index if not exists stories_status_date_idx on stories (status, date desc);
 
@@ -43,10 +46,32 @@ create table if not exists insights (
   date timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   seo_title text,
-  seo_description text
+  seo_description text,
+  publish_at timestamptz,
+  featured boolean not null default false
 );
 
+alter table insights add column if not exists publish_at timestamptz;
+alter table insights add column if not exists featured boolean not null default false;
+
 create index if not exists insights_status_date_idx on insights (status, date desc);
+
+create table if not exists events (
+  id text primary key default ('event-' || gen_random_uuid()::text),
+  name text not null,
+  slug text not null unique,
+  client text default '',
+  description text default '',
+  category text not null default 'Event Coverage',
+  images text[] not null default '{}',
+  video_url text default '',
+  status text not null default 'published',
+  date timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  publish_at timestamptz
+);
+
+create index if not exists events_status_date_idx on events (status, date desc);
 
 create table if not exists messages (
   id text primary key default ('msg-' || gen_random_uuid()::text),

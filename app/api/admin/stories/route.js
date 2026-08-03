@@ -2,6 +2,15 @@ import { NextResponse } from "next/server";
 import { ADMIN_COOKIE_NAME, isValidAdminSession } from "@/lib/adminAuth";
 import { addLocalStory } from "@/lib/localStories";
 
+// The admin form's datetime-local input has no timezone info, so an empty
+// value means "publish immediately" rather than an invalid date.
+function parsePublishAt(value) {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) return null;
+  const date = new Date(trimmed);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
 export async function POST(request) {
   const session = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
   if (!isValidAdminSession(session)) {
@@ -27,6 +36,7 @@ export async function POST(request) {
       readingTime: String(formData.get("readingTime") || ""),
       tags: String(formData.get("tags") || ""),
       status: String(formData.get("status") || "published"),
+      publishAt: parsePublishAt(formData.get("publishAt")),
       category: String(formData.get("category") || "Documentary"),
       location: String(formData.get("location") || "Rwanda"),
       image: String(formData.get("image") || ""),

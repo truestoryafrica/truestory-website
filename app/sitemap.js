@@ -1,11 +1,11 @@
-import { getSiteContent } from "@/lib/cms";
+import { getSiteContent, isLive } from "@/lib/cms";
 
 export const dynamic = "force-dynamic";
 
 export default async function sitemap() {
   const { services, site, stories: allStories, insights: allInsights } = await getSiteContent();
-  const stories = allStories.filter((story) => story.status !== "draft");
-  const insights = allInsights.filter((insight) => insight.status !== "draft");
+  const stories = allStories.filter(isLive);
+  const insights = allInsights.filter(isLive);
   const now = new Date();
   return [
     {

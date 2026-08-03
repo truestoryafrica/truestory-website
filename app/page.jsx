@@ -6,6 +6,7 @@ import ScrollReveal from "@/components/ScrollReveal";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CredibilityStrip from "@/components/CredibilityStrip";
+import TestimonialCarousel from "@/components/TestimonialCarousel";
 import { getSiteContent } from "@/lib/cms";
 import { organizationJsonLd, pageMetadata } from "@/lib/seo";
 
@@ -373,17 +374,8 @@ function Testimonials({ testimonials }) {
         <p className="eyebrow reveal">Clients Say</p>
         <h2 className="reveal">Trusted by partners. Driven by impact.</h2>
       </div>
-      <div className="testimonial-grid reveal-group">
-        {testimonials.map((testimonial) => (
-          <article className="testimonial-card reveal" key={testimonial.organization}>
-            <span className="testimonial-quote-mark" aria-hidden="true">“</span>
-            <p>{testimonial.quote}</p>
-            <div className="testimonial-attribution">
-              <strong>{testimonial.role}</strong>
-              <span>{testimonial.organization}</span>
-            </div>
-          </article>
-        ))}
+      <div className="reveal">
+        <TestimonialCarousel testimonials={testimonials} />
       </div>
     </section>
   );

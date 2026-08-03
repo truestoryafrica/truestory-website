@@ -11,7 +11,7 @@ export const metadata = {
 };
 
 export default async function AdminDashboard({ searchParams }) {
-  const { stories, insights, site } = await getSiteContent();
+  const { stories, insights, events, site } = await getSiteContent();
   const params = await searchParams;
   const created = params?.created;
   const createdStatus = params?.status;
@@ -22,11 +22,15 @@ export default async function AdminDashboard({ searchParams }) {
   const createdInsight = params?.createdInsight;
   const insightError = params?.insightError;
   const deletedInsight = params?.deletedInsight;
+  const createdEvent = params?.createdEvent;
+  const eventError = params?.eventError;
+  const deletedEvent = params?.deletedEvent;
 
   return (
     <AdminDashboardClient
       stories={stories}
       insights={insights}
+      events={events}
       site={site}
       notices={{
         created,
@@ -37,7 +41,10 @@ export default async function AdminDashboard({ searchParams }) {
         dbError,
         createdInsight,
         insightError,
-        deletedInsight
+        deletedInsight,
+        createdEvent,
+        eventError,
+        deletedEvent
       }}
     />
   );
