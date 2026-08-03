@@ -1,5 +1,7 @@
 import { getSiteContent } from "@/lib/cms";
 
+export const dynamic = "force-dynamic";
+
 export default async function sitemap() {
   const { services, site, stories: allStories, insights: allInsights } = await getSiteContent();
   const stories = allStories.filter((story) => story.status !== "draft");
@@ -35,6 +37,12 @@ export default async function sitemap() {
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.9
+    },
+    {
+      url: `${site.url}/terms`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.3
     },
     ...services.map((service) => ({
       url: `${site.url}/services/${service.slug}`,

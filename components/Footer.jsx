@@ -57,7 +57,7 @@ export default function Footer({ site, services }) {
         </div>
         <div className="footer-bottom">
           <p>© {new Date().getFullYear()} {site.name}. All rights reserved.</p>
-          <Link href="#">Privacy Policy &amp; Terms of Service</Link>
+          <Link href="/terms">Privacy Policy &amp; Terms of Service</Link>
         </div>
       </div>
     </footer>
