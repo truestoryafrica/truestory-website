@@ -541,10 +541,30 @@ export default function AdminDashboardClient({ stories, insights, events, site, 
                       </>
                     ) : (
                       <article className="admin-article-preview">
+                        {draft.image && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img className="admin-article-preview-image" src={draft.image} alt={draft.alt || draft.title} />
+                        )}
                         <p className="eyebrow">{contentKind === "insight" ? draft.category : `${draft.category} / ${draft.location}`}</p>
                         <h1>{draft.title || "Untitled story"}</h1>
                         <p>{draft.excerpt || "Story excerpt will appear here."}</p>
+                        {(draft.author || draft.readingTime) && (
+                          <div className="insight-meta">
+                            {draft.author && <span>{draft.author}</span>}
+                            <span>
+                              {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                            </span>
+                            {draft.readingTime && <span>{draft.readingTime}</span>}
+                          </div>
+                        )}
                         <div className="story-rich-body" dangerouslySetInnerHTML={{ __html: bodyHtml || "<p>Start writing to preview the story body.</p>" }} />
+                        {draft.tags && (
+                          <div className="insight-tags">
+                            {draft.tags.split(",").map((tag) => tag.trim()).filter(Boolean).map((tag) => (
+                              <span key={tag}>{tag}</span>
+                            ))}
+                          </div>
+                        )}
                       </article>
                     )}
                   </section>
