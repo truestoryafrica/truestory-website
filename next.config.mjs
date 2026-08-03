@@ -10,6 +10,24 @@ const nextConfig = {
       }
     ]
   },
+  async redirects() {
+    return [
+      // Old static-site URLs that no longer exist under these slugs — send
+      // both search engines and anyone with an old bookmark/backlink to the
+      // current equivalent instead of a 404.
+      { source: "/impact", destination: "/#impact", permanent: true },
+      { source: "/services", destination: "/#services", permanent: true },
+      { source: "/services/documentary", destination: "/services/documentary-video-production-rwanda", permanent: true },
+      { source: "/services/photo-storytelling", destination: "/services/photography-services-kigali-rwanda", permanent: true },
+      { source: "/services/content-writing", destination: "/services/content-writing-rwanda", permanent: true },
+      { source: "/services/communication", destination: "/services/communication-services-rwanda", permanent: true },
+      { source: "/services/event-coverage", destination: "/services/event-coverage-rwanda", permanent: true },
+      { source: "/services/social-media", destination: "/services/social-media-management-rwanda", permanent: true },
+      { source: "/stories/mothers-hope", destination: "/stories/mothers-hope-rural-health-rwanda", permanent: true },
+      { source: "/stories/brighter-tomorrow", destination: "/stories/brighter-tomorrow-education-rwanda", permanent: true },
+      { source: "/stories/growing-resilience", destination: "/stories/growing-resilience-smallholder-farmers-rwanda", permanent: true }
+    ];
+  },
   async headers() {
     return [
       {

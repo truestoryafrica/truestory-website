@@ -122,6 +122,8 @@ Open http://localhost:3000. Admin dashboard: http://localhost:3000/admin/login.
 | `SUPABASE_ANON_KEY` | For image uploads | Supabase anon/publishable API key — see [Image uploads](#image-uploads) |
 | `ADMIN_PASSWORD` | In production | Admin login password. **Without this set, the admin panel auto-locks in production** rather than falling back to a default — this is intentional and safe. |
 | `ADMIN_SESSION_TOKEN` | In production | Long random string used to sign the admin session cookie |
+| `RESEND_API_KEY` | For admin password reset | Resend (resend.com) API key used to email the reset link from `/admin/forgot-password` |
+| `RESEND_FROM_EMAIL` | Optional | From-address for reset emails; falls back to `TrueStory Africa <onboarding@resend.dev>` if unset |
 | `NEXT_PUBLIC_SITE_URL` | Yes | Used to build canonical URLs, sitemap, Open Graph tags |
 | `FORMSPREE_FORM_ID` | Optional | If set, contact form submissions are forwarded to this Formspree form for email notification. Submissions are always saved to the database regardless. |
 | `CONTACT_WEBHOOK_URL` | Optional | If set, also POSTs each submission here (Slack/Zapier/Make automation) |
